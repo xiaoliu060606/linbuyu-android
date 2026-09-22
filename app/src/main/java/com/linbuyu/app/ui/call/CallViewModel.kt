@@ -101,7 +101,7 @@ class CallViewModel(app: Application) : AndroidViewModel(app) {
         silenceSince = 0
         var silentMs = 0L
         while (true) {
-            if (!loopJob?.isActive == true) return null
+            if (loopJob?.isActive != true) return null
             val amp = CallAudioCapture.amplitude()
             if (amp > 800) {   // 说话
                 if (!speaking) {

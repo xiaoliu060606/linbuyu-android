@@ -1,7 +1,6 @@
 package com.linbuyu.app.audio
 
 import android.content.Context
-import android.media.AmrInputStream
 import android.media.MediaRecorder
 import java.io.File
 

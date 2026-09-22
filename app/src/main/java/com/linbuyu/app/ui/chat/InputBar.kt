@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Call
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material3.Icon
@@ -56,7 +56,7 @@ fun InputBar(vm: ChatViewModel, enabled: Boolean = true, onCallClick: () -> Unit
     ) {
         IconButton(onClick = onCallClick, enabled = enabled) {
             Icon(
-                Icons.AutoMirrored.Filled.Call,
+                Icons.Filled.Phone,
                 contentDescription = "语音通话",
                 tint = WeChatColors.Accent,
                 modifier = Modifier.size(24.dp),
