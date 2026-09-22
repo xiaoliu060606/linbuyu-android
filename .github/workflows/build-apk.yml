@@ -32,6 +32,9 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
+        env:
+          APP_VERSION_CODE: ${{ github.run_number }}
+          APP_VERSION_NAME: "1.${{ github.run_number }}"
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK artifact
@@ -47,3 +50,11 @@ jobs:
             -H "X-Apk-Token: linbuyu-build-2026" \
             --data-binary "@app/build/outputs/apk/debug/app-debug.apk" \
             -w "\nserver push: HTTP %{http_code}\n"
+
+      - name: Push version.json to server (OTA check)
+        run: |
+          curl -s -m 30 -X POST "https://xuenai.cc.cd/api/version" \
+            -H "X-Apk-Token: linbuyu-build-2026" \
+            -H "Content-Type: application/json" \
+            -d "{\"versionCode\": ${{ github.run_number }}, \"versionName\": \"1.${{ github.run_number }}\"}" \
+            -w "\nversion push: HTTP %{http_code}\n"

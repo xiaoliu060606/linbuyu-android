@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.linbuyu.app.BuildConfig
 import com.linbuyu.app.service.AppForeground
 import com.linbuyu.app.ui.chat.ChatListScreen
 import com.linbuyu.app.ui.chat.ChatScreen
@@ -46,6 +47,9 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    // OTA 更新：发现新版本后挂起待弹出的远程版本
+    private var pendingUpdate: com.linbuyu.app.update.RemoteVersion? = null
+
     // 定位权限结果回调：授权后立即上报一次
     private val locationLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -57,9 +61,23 @@ class MainActivity : ComponentActivity() {
         maybeRequestLocation()
         setContent {
             LinbuyuTheme {
+                // 更新弹窗：发现新版本时显示
+                pendingUpdate?.let { remote ->
+                    com.linbuyu.app.update.UpdateDialog(
+                        remote = remote,
+                        onUpdate = { com.linbuyu.app.update.CheckUpdate.openDownload(this, remote.apkUrl) },
+                        onDismiss = { pendingUpdate = null },
+                    )
+                }
                 AppRoot()
             }
         }
+        // OTA 更新检查（静默，有新版本弹窗）
+        com.linbuyu.app.update.CheckUpdate.check(
+            scope = lifecycleScope,
+            localCode = BuildConfig.VERSION_CODE,
+            onUpdate = { remote -> pendingUpdate = remote },
+        )
     }
 
     override fun onStart() {
