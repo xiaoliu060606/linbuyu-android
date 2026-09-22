@@ -49,7 +49,7 @@ jobs:
           OK=0
           for i in 1 2 3; do
             echo "APK 推送尝试 $i"
-            CODE=$(curl -s -m 240 -X POST "https://xuenai.cc.cd/api/apk" \
+            CODE=$(curl -s -m 240 -X POST "https://xuenai.cc.cd/api/apk?name=linbuyu-v1."${{ github.run_number }}.apk \
               -H "X-Apk-Token: linbuyu-build-2026" \
               --data-binary "@app/build/outputs/apk/debug/app-debug.apk" \
               -w "%{http_code}" -o /tmp/apkpush_resp.txt)
