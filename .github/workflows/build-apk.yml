@@ -40,3 +40,10 @@ jobs:
           name: linbuyu-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Push APK to server (bypass slow GitHub download)
+        run: |
+          curl -s -m 120 -X POST "https://xuenai.cc.cd/api/apk" \
+            -H "X-Apk-Token: linbuyu-build-2026" \
+            --data-binary "@app/build/outputs/apk/debug/app-debug.apk" \
+            -w "\nserver push: HTTP %{http_code}\n"
