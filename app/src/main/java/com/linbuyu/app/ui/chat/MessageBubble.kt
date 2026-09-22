@@ -1,5 +1,6 @@
 package com.linbuyu.app.ui.chat
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -91,6 +92,7 @@ fun moodText(mood: String): String = when (mood) {
 fun formatVoiceDuration(millis: Long): String = "${(millis + 500) / 1000}″"
 
 @Composable
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 fun MessageBubble(
     msg: ChatMessage,
     prevTs: Long?,
@@ -127,7 +129,7 @@ fun MessageBubble(
 }
 
 @Composable
-@androidx.compose.foundation.ExperimentalFoundationApi
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 private fun BubbleBox(
     msg: ChatMessage,
     isUser: Boolean,

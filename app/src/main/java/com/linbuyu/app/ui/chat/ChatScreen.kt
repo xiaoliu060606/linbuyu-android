@@ -1,6 +1,7 @@
 package com.linbuyu.app.ui.chat
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,6 +49,7 @@ import com.linbuyu.app.audio.TtsPlayer
 import com.linbuyu.app.ui.theme.WeChatColors
 
 @Composable
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 fun ChatScreen(vm: ChatViewModel, onBack: () -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
     val playingId by TtsPlayer.playingId.collectAsStateWithLifecycle()
