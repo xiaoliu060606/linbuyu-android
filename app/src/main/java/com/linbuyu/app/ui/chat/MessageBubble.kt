@@ -127,6 +127,7 @@ fun MessageBubble(
 }
 
 @Composable
+@androidx.compose.foundation.ExperimentalFoundationApi
 private fun BubbleBox(
     msg: ChatMessage,
     isUser: Boolean,
