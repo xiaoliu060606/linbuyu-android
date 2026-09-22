@@ -93,7 +93,11 @@ object CheckUpdate {
                             null
                         } else {
                             val patched = File(context.cacheDir, "linbuyu_patched.apk")
-                            val ok = BsPatch.patch(File(patch), baseApk, patched)
+                            // 补丁字节写临时文件
+                            val patchFile = File(context.cacheDir, "linbuyu_patch.bin")
+                            patchFile.writeBytes(patch)
+                            val ok = BsPatch.patch(patchFile, baseApk, patched)
+                            patchFile.delete()
                             if (ok) {
                                 patched.copyTo(outFile, overwrite = true)
                                 patched.delete()
