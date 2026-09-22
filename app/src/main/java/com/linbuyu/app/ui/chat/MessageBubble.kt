@@ -1,12 +1,15 @@
 package com.linbuyu.app.ui.chat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,6 +25,12 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,6 +87,9 @@ fun moodText(mood: String): String = when (mood) {
     else -> "平静"
 }
 
+/** 微信风格语音条时长显示："5″" */
+fun formatVoiceDuration(millis: Long): String = "${(millis + 500) / 1000}″"
+
 @Composable
 fun MessageBubble(
     msg: ChatMessage,
@@ -86,6 +98,7 @@ fun MessageBubble(
     userName: String,
     playingId: Long? = null,
     onTtsClick: (() -> Unit)? = null,
+    onLongPress: (() -> Unit)? = null,
 ) {
     Column(Modifier.fillMaxWidth()) {
         if (shouldShowTimeLabel(prevTs, msg.timestamp)) {
@@ -104,7 +117,7 @@ fun MessageBubble(
             if (isUser) Spacer(Modifier.width(56.dp))
             else MessageAvatar(isAi = true, name = aiName)
             Spacer(Modifier.width(8.dp))
-            BubbleBox(msg, isUser, playingId, onTtsClick)
+            BubbleBox(msg, isUser, playingId, onTtsClick, onLongPress)
             if (isUser) {
                 Spacer(Modifier.width(8.dp))
                 MessageAvatar(isAi = false, name = userName)
@@ -114,7 +127,13 @@ fun MessageBubble(
 }
 
 @Composable
-private fun BubbleBox(msg: ChatMessage, isUser: Boolean, playingId: Long?, onTtsClick: (() -> Unit)?) {
+private fun BubbleBox(
+    msg: ChatMessage,
+    isUser: Boolean,
+    playingId: Long?,
+    onTtsClick: (() -> Unit)?,
+    onLongPress: (() -> Unit)?,
+) {
     val shape = if (isUser) {
         RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomStart = 12.dp, bottomEnd = 2.dp)
     } else {
@@ -124,45 +143,150 @@ private fun BubbleBox(msg: ChatMessage, isUser: Boolean, playingId: Long?, onTts
     else if (isUser) WeChatColors.BubbleUser
     else WeChatColors.BubbleAi
     val textColor = if (msg.isError) Color(0xFFD32F2F) else WeChatColors.TextPrimary
-    Box(
-        modifier = Modifier
-            .widthIn(max = 260.dp)
-            .clip(shape)
-            .background(bg)
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-        Column {
-            Text(
-                text = msg.content,
-                color = textColor,
-                fontSize = 15.sp,
-                lineHeight = 21.sp,
-                overflow = TextOverflow.Visible,
-            )
-            // AI 消息右下角语音播放按钮：本消息播放中显示 ⏹（点击停止），否则 🔊
-            if (!isUser && !msg.special && onTtsClick != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-                        IconButton(
-                            onClick = onTtsClick,
-                            modifier = Modifier.size(24.dp),
+
+    val interactionSource = remember { MutableInteractionSource() }
+    Column {
+        Box(
+            modifier = Modifier
+                .widthIn(max = 260.dp)
+                .clip(shape)
+                .background(bg)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = { onTtsClick?.invoke() },
+                    onLongClick = { onLongPress?.invoke() },
+                )
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            if (msg.isVoice && !isUser && !msg.special) {
+                // ── AI 语音条（微信风格：白气泡 + 喇叭朝左 + 时长，未播完有红点）──
+                VoiceRow(msg, playingId, onTtsClick)
+            } else {
+                Column {
+                    Text(
+                        text = msg.content,
+                        color = textColor,
+                        fontSize = 15.sp,
+                        lineHeight = 21.sp,
+                        overflow = TextOverflow.Visible,
+                    )
+                    // 非语音形态的 AI 消息：右下角保留语音播放小按钮
+                    if (!isUser && !msg.special && onTtsClick != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
                         ) {
-                            Icon(
-                                imageVector = if (playingId == msg.id) Icons.Filled.Stop else Icons.AutoMirrored.Filled.VolumeUp,
-                                contentDescription = if (playingId == msg.id) "停止播放" else "播放语音",
-                                tint = WeChatColors.TextSecondary,
-                                modifier = Modifier.size(15.dp),
-                            )
+                            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+                                IconButton(
+                                    onClick = onTtsClick,
+                                    modifier = Modifier.size(24.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = if (playingId == msg.id) Icons.Filled.Stop else Icons.AutoMirrored.Filled.VolumeUp,
+                                        contentDescription = if (playingId == msg.id) "停止播放" else "播放语音",
+                                        tint = WeChatColors.TextSecondary,
+                                        modifier = Modifier.size(15.dp),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+        // 语音消息转文字结果（长按“转文字”后显示在气泡正下方，微信同款浅灰块）
+        if (msg.isVoice && msg.transcript != null) {
+            Text(
+                text = msg.transcript,
+                modifier = Modifier
+                    .widthIn(max = 260.dp)
+                    .padding(top = 4.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color(0xFFF7F7F7))
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                fontSize = 13.sp,
+                color = Color(0xFF666666),
+                lineHeight = 18.sp,
+            )
+        } else if (msg.isVoice && msg.voiceTranscribing) {
+            Text(
+                text = "转文字中…",
+                modifier = Modifier
+                    .widthIn(max = 260.dp)
+                    .padding(top = 4.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color(0xFFF7F7F7))
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                fontSize = 13.sp,
+                color = Color(0xFF999999),
+            )
+        }
     }
 }
+
+/** 微信风格语音条：喇叭图标朝左 + 播放动效 + 秒数实时累加 */
+@Composable
+private fun VoiceRow(msg: ChatMessage, playingId: Long?, onTtsClick: (() -> Unit)?) {
+    val isPlaying = playingId == msg.id
+    // 播放中：秒数从 0 实时累加（模拟微信语音条时长）
+    var elapsedMs by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(isPlaying) {
+        if (isPlaying) {
+            elapsedMs = 0L
+            while (true) {
+                kotlinx.coroutines.delay(1000)
+                elapsedMs += 1000
+            }
+        }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        // 播放动效：3 条声波弧线循环（scale 动画）
+        if (isPlaying) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                repeat(3) { i ->
+                    val phase = remember { (i * 200) }
+                    var anim by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            kotlinx.coroutines.delay(200L + phase)
+                            anim = !anim
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .width(3.dp)
+                            .height(if (anim) 14.dp else 7.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF333333))
+                    )
+                }
+            }
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = formatVoiceDuration(elapsedMs),
+                fontSize = 13.sp,
+                color = Color(0xFF666666),
+            )
+        } else {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                contentDescription = "播放语音",
+                tint = Color(0xFF333333),
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = formatVoiceDuration(estimateDuration(msg.content)),
+                fontSize = 13.sp,
+                color = Color(0xFF666666),
+            )
+        }
+    }
+}
+
+/** 按文本长度估算语音时长（微信按实际时长，我们 TTS 未生成前用估算） */
+private fun estimateDuration(text: String): Long = (text.length * 280L).coerceIn(1000L, 30000L)
 
 @Composable
 private fun MessageAvatar(isAi: Boolean, name: String) {

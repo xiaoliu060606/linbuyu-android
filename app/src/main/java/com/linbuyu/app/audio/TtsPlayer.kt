@@ -23,7 +23,7 @@ object TtsPlayer {
     /** 播放一段 TTS 音频；播放中调用会先停掉上一条（全局仅一条在播）。 */
     fun play(messageId: Long, bytes: ByteArray, context: Context) {
         stop()
-        val file = File(context.cacheDir, "tts_latest.ogg")
+        val file = File(context.cacheDir, "tts_latest.mp3")
         file.writeBytes(bytes)
         val mp = MediaPlayer()
         mp.setOnCompletionListener { stop() }
@@ -47,5 +47,10 @@ object TtsPlayer {
         }
         player = null
         _playingId.value = null
+    }
+
+    /** 若正在播放该消息则停止（删除消息时用） */
+    fun stopIfPlaying(messageId: Long) {
+        if (_playingId.value == messageId) stop()
     }
 }

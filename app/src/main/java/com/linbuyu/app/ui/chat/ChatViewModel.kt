@@ -31,6 +31,9 @@ data class ChatMessage(
     val isStreaming: Boolean = false,
     val isError: Boolean = false,
     val special: Boolean = false,        // 系统气泡（提醒等），不显示语音播放按钮
+    val isVoice: Boolean = false,        // 语音条形态（AI 选择语音回复时）
+    val transcript: String? = null,      // 语音消息的转文字结果（长按“转文字”后填充）
+    val voiceTranscribing: Boolean = false, // 正在转文字
 )
 
 data class ChatUiState(
@@ -78,6 +81,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     private var segmentCount = 0
     private var currentBubbleId: Long = 0
     private var typeJob: Job? = null
+    private var lastVoiceMode = false   // 本次回复是否为语音条形态（由后端 done.voice_mode 决定）
 
     init {
         loadInitial()
@@ -149,6 +153,35 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** 语音消息长按“转文字”：把 AI 语音条转写为文字（复用后端 ASR，内容即回复原文） */
+    fun transcribeVoice(msg: ChatMessage) {
+        if (!msg.isVoice || msg.content.isBlank() || msg.transcript != null) return
+        if (msg.voiceTranscribing) return
+        _state.update { st ->
+            st.copy(messages = st.messages.map { if (it.id == msg.id) it.copy(voiceTranscribing = true) else it })
+        }
+        // 直接复用回复原文作为转录文本（TTS 来源就是这段文字，无需再走 ASR）
+        viewModelScope.launch {
+            // 模拟 ASR 延迟，UI 有“转写中”反馈
+            delay(300)
+            _state.update { st ->
+                st.copy(messages = st.messages.map {
+                    if (it.id == msg.id) it.copy(transcript = msg.content, voiceTranscribing = false) else it
+                })
+            }
+        }
+    }
+
+    /** 长按菜单“删除”：移除一条消息（仅本地） */
+    fun deleteMessage(msg: ChatMessage) {
+        TtsPlayer.stopIfPlaying(msg.id)
+        _state.update { st ->
+            st.copy(messages = st.messages.filterNot { it.id == msg.id })
+        }
+    }
+
+
+
     /** 输入栏 ☁️：拉天气并以 Toast 展示 */
     fun fetchWeather() {
         viewModelScope.launch {
@@ -200,6 +233,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun onDone(evt: ChatEvent) {
+        lastVoiceMode = evt.voice_mode   // AI 本次选择语音条形态
         if (evt.content.isNotEmpty()) {
             // 以 done 全文校准，避免流式丢字
             fullText = StringBuilder(evt.content)
@@ -278,8 +312,11 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun sealBubble() {
         _state.update { st ->
-            st.copy(messages = st.messages.map { if (it.id == currentBubbleId) it.copy(isStreaming = false) else it })
+            st.copy(messages = st.messages.map {
+                if (it.id == currentBubbleId) it.copy(isStreaming = false, isVoice = lastVoiceMode) else it
+            })
         }
+        lastVoiceMode = false
     }
 
     /** 分段延迟：500 + 300 * (1 + (4 - 粘人度) * 0.8)^段数 + 随机，粘人度越低停顿越久 */

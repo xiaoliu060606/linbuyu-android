@@ -7,6 +7,7 @@ data class ChatEvent(
     val mood: String? = null,
     val mood_emoji: String? = null,
     val images: List<ImageRef>? = null,
+    val voice_mode: Boolean = false,     // done 事件：本次回复是否以语音条形态展示
 )
 
 data class ImageRef(val type: String? = null, val url: String? = null)
@@ -34,6 +35,9 @@ data class HistoryItem(
     val content: String = "",
     val emotion: String? = null,
 )
+
+/** POST /api/voice/recognize 返回 */
+data class VoiceRecogResponse(val text: String = "")
 
 /** GET /api/proactive */
 data class ProactiveResponse(val messages: List<ProactiveMessage> = emptyList())

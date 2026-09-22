@@ -24,7 +24,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.activity.compose.BackHandler
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.linbuyu.app.ui.call.CallScreen
+import com.linbuyu.app.ui.call.CallViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.linbuyu.app.R
 import com.linbuyu.app.audio.TtsPlayer
 import com.linbuyu.app.ui.theme.WeChatColors
@@ -49,11 +55,35 @@ fun ChatScreen(vm: ChatViewModel, onBack: () -> Unit) {
 
     BackHandler(onBack = onBack)
 
+    // 长按消息弹菜单：记录被长按的语音消息（仅 AI 语音消息可弹）
+    var longPressed by remember { mutableStateOf<ChatMessage?>(null) }
+    // 通话界面开关
+    var showCall by remember { mutableStateOf(false) }
+
     // 新消息/打字中自动滚到底部
     val lastMsgSize = state.messages.lastOrNull()?.content?.length ?: 0
     LaunchedEffect(state.messages.size, lastMsgSize, state.loadingHistory) {
         if (state.messages.isNotEmpty()) {
             listState.animateScrollToItem(state.messages.size - 1)
+        }
+    }
+
+    longPressed?.let { msg ->
+        if (msg.isVoice) {
+            VoiceActionSheet(
+                items = listOf(
+                    "转文字" to { vm.transcribeVoice(msg) },
+                    "删除" to { vm.deleteMessage(msg) },
+                ),
+                onDismiss = { longPressed = null },
+            )
+        } else {
+            VoiceActionSheet(
+                items = listOf(
+                    "删除" to { vm.deleteMessage(msg) },
+                ),
+                onDismiss = { longPressed = null },
+            )
         }
     }
 
@@ -85,6 +115,7 @@ fun ChatScreen(vm: ChatViewModel, onBack: () -> Unit) {
                     userName = state.userName,
                     playingId = playingId,
                     onTtsClick = { vm.toggleTts(msg) },
+                    onLongPress = { longPressed = msg },
                 )
             }
             if (state.statusLabel.isNotEmpty()) {
@@ -100,7 +131,14 @@ fun ChatScreen(vm: ChatViewModel, onBack: () -> Unit) {
             }
         }
 
-        InputBar(vm, enabled = !state.loadingHistory)
+        InputBar(vm, enabled = !state.loadingHistory, onCallClick = { showCall = true })
+    }
+
+    // 通话界面（全屏覆盖）
+    if (showCall) {
+        val callVm: CallViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        androidx.compose.runtime.LaunchedEffect(Unit) { callVm.start() }
+        CallScreen(callVm, state.aiName, onEnd = { showCall = false })
     }
 }
 

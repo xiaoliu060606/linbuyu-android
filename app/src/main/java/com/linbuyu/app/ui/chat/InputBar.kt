@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Call
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material3.Icon
@@ -35,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.linbuyu.app.ui.theme.WeChatColors
 
 @Composable
-fun InputBar(vm: ChatViewModel, enabled: Boolean = true) {
+fun InputBar(vm: ChatViewModel, enabled: Boolean = true, onCallClick: () -> Unit = {}) {
     var text by rememberSaveable { mutableStateOf("") }
 
     fun send() {
@@ -53,6 +54,15 @@ fun InputBar(vm: ChatViewModel, enabled: Boolean = true) {
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        IconButton(onClick = onCallClick, enabled = enabled) {
+            Icon(
+                Icons.AutoMirrored.Filled.Call,
+                contentDescription = "语音通话",
+                tint = WeChatColors.Accent,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+        Spacer(Modifier.width(2.dp))
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },

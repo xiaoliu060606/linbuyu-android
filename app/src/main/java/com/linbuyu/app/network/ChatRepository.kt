@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 
 /** 后端 REST API 封装（SSE 聊天流走 SseClient）。失败一律返回空值/空列表，由 UI 层兜底提示。 */
 class ChatRepository(private val api: ApiClient, private val sse: SseClient) {
@@ -14,6 +15,20 @@ class ChatRepository(private val api: ApiClient, private val sse: SseClient) {
     private val emptyBody = "{}".toRequestBody(jsonMedia)
 
     fun chatStream(message: String) = sse.chatStream(message)
+
+    /** 非流式单轮对话（通话用）：收集完整回复文本，失败返回 null */
+    suspend fun chatOnce(message: String): String? = withContext(Dispatchers.IO) {
+        val sb = StringBuilder()
+        var done = false
+        sse.chatStream(message).collect { evt ->
+            when (evt.type) {
+                "chunk" -> sb.append(evt.content)
+                "done" -> { done = true }
+                "error" -> { done = true }
+            }
+        }
+        if (sb.isNotBlank() || done) sb.toString().takeIf { it.isNotBlank() } else null
+    }
 
     suspend fun fetchStatus(): StatusResponse = withContext(Dispatchers.IO) {
         api.client.newCall(api.buildRequest("/api/status")).execute().use { resp ->
@@ -49,6 +64,29 @@ class ChatRepository(private val api: ApiClient, private val sse: SseClient) {
             val body = gson.toJson(mapOf("text" to text)).toRequestBody(jsonMedia)
             api.client.newCall(api.buildRequest("/api/tts", "POST", body)).execute().use { resp ->
                 if (resp.isSuccessful) resp.body?.bytes() else null
+            }
+        }.getOrNull()
+    }
+
+    /** /api/voice/recognize 语音识别：上传音频 → 文字（通话链路核心） */
+    suspend fun recognizeSpeech(file: java.io.File): String? = withContext(Dispatchers.IO) {
+        runCatching {
+            val mime = when (file.extension.lowercase()) {
+                "amr" -> "audio/amr"
+                "m4a" -> "audio/mp4"
+                "mp3" -> "audio/mpeg"
+                "ogg" -> "audio/ogg"
+                "wav" -> "audio/wav"
+                else -> "audio/amr"
+            }
+            val body = okhttp3.MultipartBody.Builder()
+                .setType(okhttp3.MultipartBody.FORM)
+                .addFormDataPart("file", "audio." + file.extension, file.asRequestBody(mime.toMediaType()))
+                .build()
+            api.client.newCall(api.buildRequest("/api/voice/recognize", "POST", body)).execute().use { resp ->
+                if (resp.isSuccessful) {
+                    gson.fromJson(resp.body?.string(), VoiceRecogResponse::class.java).text
+                } else null
             }
         }.getOrNull()
     }
