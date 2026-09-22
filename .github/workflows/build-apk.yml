@@ -61,43 +61,16 @@ jobs:
 
       - name: Build incremental patch (bsdiff vs previous APK)
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq bsdiff > /dev/null 2>&1
-          # 拉取服务器上的上一版 APK 作为基准
-          PREV_CODE=$(( ${{ github.run_number }} - 1 ))
-          PREV_URL="${SERVER_BASE}/apk/linbuyu-v1.0.apk"
-          echo "基准版本 code=${PREV_CODE}"
-          if curl -s -m 240 -o /tmp/prev.apk "${PREV_URL}" && [ -s /tmp/prev.apk ]; then
-            echo "已下载上一版 APK: $(stat -c %s /tmp/prev.apk) bytes"
-            OLD=/tmp/prev.apk; NEW=app/build/outputs/apk/debug/app-debug.apk; PATCH=/tmp/patch.bin
-            bsdiff "$OLD" "$NEW" "$PATCH"
-            echo "补丁生成: $(stat -c %s $PATCH) bytes (整包 $(stat -c %s $NEW) bytes)"
-            # 推送补丁
-            curl -s -m 120 -X POST "https://xuenai.cc.cd/api/patch/linbuyu-"${{ github.run_number }}.bin \
-              -H "X-Apk-Token: linbuyu-build-2026" \
-              --data-binary "@$PATCH" \
-              -w "\npatch push: HTTP %{http_code}\n"
-            echo "PATCH_READY=1" >> $GITHUB_ENV
-            echo "PATCH_URL=/apk/patch/linbuyu-"${{ github.run_number }}.bin >> $GITHUB_ENV
-            echo "PATCH_FROM=${PREV_CODE}" >> $GITHUB_ENV
-          else
-            echo "无上一版 APK（首次构建），跳过差分补丁"
-            echo "PATCH_READY=0" >> $GITHUB_ENV
-          fi
-        env:
-          SERVER_BASE: "https://xuenai.cc.cd"
+          # 差分补丁改在服务器本地生成（避免 Actions↔服务器 大文件双向慢传输）
+          # 服务器已持有旧 APK 和刚推送的新 APK，bsdiff 本地秒级完成
+          curl -s -m 30 -X POST "https://xuenai.cc.cd/api/genpatch?code="${{ github.run_number }} \
+            -H "X-Apk-Token: linbuyu-build-2026" \
+            -w "\ngenpatch: HTTP %{http_code}\n"
 
       - name: Push version.json to server (OTA check)
         run: |
-          if [ "${{ env.PATCH_READY }}" == "1" ]; then
-            curl -s -m 30 -X POST "https://xuenai.cc.cd/api/version" \
-              -H "X-Apk-Token: linbuyu-build-2026" \
-              -H "Content-Type: application/json" \
-              -d "{\"versionCode\": ${{ github.run_number }}, \"versionName\": \"1.${{ github.run_number }}\", \"patchUrl\": \"${{ env.PATCH_URL }}\", \"patchFrom\": ${{ env.PATCH_FROM }}}" \
-              -w "\nversion push: HTTP %{http_code}\n"
-          else
-            curl -s -m 30 -X POST "https://xuenai.cc.cd/api/version" \
-              -H "X-Apk-Token: linbuyu-build-2026" \
-              -H "Content-Type: application/json" \
-              -d "{\"versionCode\": ${{ github.run_number }}, \"versionName\": \"1.${{ github.run_number }}\"}" \
-              -w "\nversion push (no patch): HTTP %{http_code}\n"
-          fi
+          curl -s -m 30 -X POST "https://xuenai.cc.cd/api/version" \
+            -H "X-Apk-Token: linbuyu-build-2026" \
+            -H "Content-Type: application/json" \
+            -d "{\"versionCode\": ${{ github.run_number }}, \"versionName\": \"1.${{ github.run_number }}\"}" \
+            -w "\nversion push: HTTP %{http_code}\n"
