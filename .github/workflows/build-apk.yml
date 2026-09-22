@@ -72,5 +72,5 @@ jobs:
           curl -s -m 30 -X POST "https://xuenai.cc.cd/api/version" \
             -H "X-Apk-Token: linbuyu-build-2026" \
             -H "Content-Type: application/json" \
-            -d "{\"versionCode\": ${{ github.run_number }}, \"versionName\": \"1.${{ github.run_number }}\"}" \
+            -d "{\"versionCode\": ${{ github.run_number }}, \"versionName\": \"1.${{ github.run_number }}\", \"apkUrl\": \"/apk/linbuyu-v1.${{ github.run_number }}.apk\"}" \
             -w "\nversion push: HTTP %{http_code}\n"
