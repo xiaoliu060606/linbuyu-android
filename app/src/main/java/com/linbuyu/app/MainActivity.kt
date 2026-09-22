@@ -74,8 +74,8 @@ class MainActivity : ComponentActivity() {
 
     /** 已有定位权限直接上报；没有则请求（运行时权限） */
     private fun maybeRequestLocation() {
-        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
         if (granted) reportLocation() else locationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
