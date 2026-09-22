@@ -44,12 +44,20 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
-      - name: Push APK to server (bypass slow GitHub download)
+      - name: Push APK to server (bypass slow GitHub download, retry)
         run: |
-          curl -s -m 120 -X POST "https://xuenai.cc.cd/api/apk" \
-            -H "X-Apk-Token: linbuyu-build-2026" \
-            --data-binary "@app/build/outputs/apk/debug/app-debug.apk" \
-            -w "\nserver push: HTTP %{http_code}\n"
+          OK=0
+          for i in 1 2 3; do
+            echo "APK 推送尝试 $i"
+            CODE=$(curl -s -m 240 -X POST "https://xuenai.cc.cd/api/apk" \
+              -H "X-Apk-Token: linbuyu-build-2026" \
+              --data-binary "@app/build/outputs/apk/debug/app-debug.apk" \
+              -w "%{http_code}" -o /tmp/apkpush_resp.txt)
+            echo "HTTP $CODE"
+            if [ "$CODE" == "200" ]; then OK=1; break; fi
+            sleep 20
+          done
+          if [ "$OK" != "1" ]; then echo "APK 推送最终失败"; cat /tmp/apkpush_resp.txt; exit 1; fi
 
       - name: Build incremental patch (bsdiff vs previous APK)
         run: |
