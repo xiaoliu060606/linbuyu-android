@@ -29,10 +29,12 @@ import androidx.compose.ui.window.Dialog
 @Composable
 fun UpdateDialog(
     remote: RemoteVersion,
+    mode: UpdateMode = UpdateMode.Full,
+    updating: Boolean = false,
     onUpdate: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(onDismissRequest = { if (!updating) onDismiss() }) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,7 +62,11 @@ fun UpdateDialog(
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "是否下载并安装更新？\n更新后体验更流畅。",
+                text = when {
+                    updating -> "正在下载更新…\n请稍候"
+                    mode == UpdateMode.Incremental -> "本次为增量更新（更省流量）\n是否立即更新？"
+                    else -> "是否下载并安装更新？\n更新后体验更流畅。"
+                },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 6.dp),
                 fontSize = 14.sp,
                 color = Color(0xFF666666),
@@ -75,34 +81,36 @@ fun UpdateDialog(
                     .background(Color(0xFFE5E5E5))
             )
             Row(Modifier.fillMaxWidth().height(50.dp)) {
+                if (!updating) {
+                    Text(
+                        text = "以后再说",
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp)
+                            .clickable { onDismiss() }
+                            .padding(horizontal = 16.dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp,
+                        color = Color(0xFF333333),
+                    )
+                    Box(
+                        Modifier
+                            .width(0.5.dp)
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .background(Color(0xFFE5E5E5))
+                    )
+                }
                 Text(
-                    text = "以后再说",
+                    text = if (updating) "正在更新…" else "立即更新",
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp)
-                        .clickable { onDismiss() }
+                        .clickable(enabled = !updating) { onUpdate() }
                         .padding(horizontal = 16.dp),
                     textAlign = TextAlign.Center,
                     fontSize = 16.sp,
-                    color = Color(0xFF333333),
-                )
-                Box(
-                    Modifier
-                        .width(0.5.dp)
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .background(Color(0xFFE5E5E5))
-                )
-                Text(
-                    text = "立即更新",
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(50.dp)
-                        .clickable { onUpdate(); onDismiss() }
-                        .padding(horizontal = 16.dp),
-                    textAlign = TextAlign.Center,
-                    fontSize = 16.sp,
-                    color = Color(0xFF07C160),
+                    color = if (updating) Color(0xFF999999) else Color(0xFF07C160),
                 )
             }
         }

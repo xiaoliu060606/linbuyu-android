@@ -47,8 +47,9 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    // OTA 更新：发现新版本后挂起待弹出的远程版本
-    private var pendingUpdate: com.linbuyu.app.update.RemoteVersion? = null
+    // OTA 更新：发现新版本后挂起待弹出的 (版本信息, 更新方式)
+    private var pendingUpdate: Pair<com.linbuyu.app.update.RemoteVersion, com.linbuyu.app.update.UpdateMode>? = null
+    private var updating = false   // 正在下载/合并中
 
     // 定位权限结果回调：授权后立即上报一次
     private val locationLauncher =
@@ -62,10 +63,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             LinbuyuTheme {
                 // 更新弹窗：发现新版本时显示
-                pendingUpdate?.let { remote ->
+                pendingUpdate?.let { (remote, mode) ->
                     com.linbuyu.app.update.UpdateDialog(
                         remote = remote,
-                        onUpdate = { com.linbuyu.app.update.CheckUpdate.openDownload(this, remote.apkUrl) },
+                        mode = mode,
+                        updating = updating,
+                        onUpdate = {
+                            updating = true
+                            com.linbuyu.app.update.CheckUpdate.performUpdate(
+                                scope = lifecycleScope,
+                                context = this@MainActivity,
+                                remote = remote,
+                                mode = mode,
+                            ) { success, msg ->
+                                updating = false
+                                pendingUpdate = null
+                                if (!success) {
+                                    android.widget.Toast.makeText(this@MainActivity, msg, android.widget.Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        },
                         onDismiss = { pendingUpdate = null },
                     )
                 }
@@ -76,7 +93,7 @@ class MainActivity : ComponentActivity() {
         com.linbuyu.app.update.CheckUpdate.check(
             scope = lifecycleScope,
             localCode = BuildConfig.VERSION_CODE,
-            onUpdate = { remote -> pendingUpdate = remote },
+            onUpdate = { remote, mode -> pendingUpdate = remote to mode },
         )
     }
 
