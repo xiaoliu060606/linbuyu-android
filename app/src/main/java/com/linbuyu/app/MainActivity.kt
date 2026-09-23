@@ -11,6 +11,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -63,11 +65,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 沉浸式：状态栏透明、内容延伸进状态栏，顶栏背景无缝衔接（修复顶部空白带）
-        androidx.activity.enableEdgeToEdge(
-            statusBarStyle = androidx.activity.SystemBarStyle.light(
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
                 android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT
             ),
-            navigationBarStyle = androidx.activity.SystemBarStyle.light(
+            navigationBarStyle = SystemBarStyle.light(
                 android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT
             ),
         )
