@@ -3,7 +3,6 @@ package com.linbuyu.app.ui.me
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,12 +12,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,7 +26,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -74,9 +73,18 @@ fun SettingsScreen(tab: Int, onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "返回",
+                    tint = WeChatColors.TextPrimary, // 规范：返回箭头 TextPrimary
+                )
             }
-            Text(if (tab == 0) "人物设定" else "API 配置", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                if (tab == 0) "人物设定" else "API 配置",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = WeChatColors.TextPrimary,
+            )
         }
 
         if (d == null) {
@@ -106,6 +114,8 @@ fun SettingsScreen(tab: Int, onBack: () -> Unit) {
                     },
                     enabled = !saving,
                     modifier = Modifier.fillMaxWidth().height(46.dp),
+                    shape = RoundedCornerShape(6.dp), // 规范：按钮圆角 6-8dp
+                    colors = ButtonDefaults.buttonColors(containerColor = WeChatColors.Accent),
                 ) {
                     Text(if (saving) "保存中…" else "保存设置")
                 }
@@ -174,10 +184,10 @@ private fun ApiSection(d: SettingsData, onEdit: (SettingsData) -> Unit) {
 @Composable
 private fun ToggleRow(title: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), // Switch 32dp + 边距 = 行高 52dp
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        Text(title, fontSize = 16.sp, modifier = Modifier.weight(1f))
         Switch(checked = checked, onCheckedChange = onChange)
     }
 }

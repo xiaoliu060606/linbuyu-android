@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -79,7 +80,12 @@ fun MeScreen(onOpenSettings: (Int) -> Unit) {
                 .height(50.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text("我", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                "我",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = WeChatColors.TextPrimary,
+            )
         }
 
         Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -96,11 +102,14 @@ fun MeScreen(onOpenSettings: (Int) -> Unit) {
                 )
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Text("我的伴侣", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                    Text("我的伴侣", fontSize = 16.sp)
                     Text("连接你的林不语", fontSize = 12.sp, color = WeChatColors.TextSecondary)
                 }
             }
-            HorizontalDivider(color = Color(0xFFF0F0F0))
+            HorizontalDivider(
+                color = Color(0xFFE5E5E5), // 规范：分隔线 #E5E5E5
+                thickness = 0.5.dp,
+            )
 
             SectionTitle("连接")
             SettingCell("服务器地址", baseUrl) { showUrlDialog = true }
@@ -124,18 +133,26 @@ fun MeScreen(onOpenSettings: (Int) -> Unit) {
                         }
                     },
                     enabled = !testing,
+                    shape = RoundedCornerShape(6.dp), // 规范：按钮圆角 6-8dp
+                    colors = ButtonDefaults.buttonColors(containerColor = WeChatColors.Accent),
                 ) {
                     Text(if (testing) "测试中…" else "测试连接")
                 }
                 Spacer(Modifier.width(12.dp))
                 Text(testResult, fontSize = 12.sp, color = WeChatColors.TextSecondary)
             }
-            HorizontalDivider(color = Color(0xFFF0F0F0))
+            HorizontalDivider(
+                color = Color(0xFFE5E5E5), // 规范：分隔线 #E5E5E5
+                thickness = 0.5.dp,
+            )
 
             SectionTitle("设置")
             SettingCell("人物设定", "名字 · 性格 · 参数") { onOpenSettings(0) }
             SettingCell("API 配置", "对话 · 生图 · 语音") { onOpenSettings(1) }
-            HorizontalDivider(color = Color(0xFFF0F0F0))
+            HorizontalDivider(
+                color = Color(0xFFE5E5E5), // 规范：分隔线 #E5E5E5
+                thickness = 0.5.dp,
+            )
 
             SectionTitle("关于")
             SettingCell("版本", "1.0.0（安卓原生版）") {}
@@ -193,15 +210,16 @@ fun SettingCell(title: String, value: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(52.dp) // 规范：设置项行高 52dp
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, fontSize = 15.sp)
+        Text(title, fontSize = 16.sp, color = WeChatColors.TextPrimary)
         Spacer(Modifier.weight(1f))
         Text(
             value,
-            fontSize = 13.sp,
+            fontSize = 14.sp, // 规范：右侧值 14sp #888
             color = WeChatColors.TextSecondary,
             maxLines = 1,
         )
@@ -209,7 +227,7 @@ fun SettingCell(title: String, value: String, onClick: () -> Unit) {
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = Color(0xFFCCCCCC),
+            tint = WeChatColors.TextSecondary,
         )
     }
 }
@@ -225,7 +243,16 @@ private fun EditTextDialog(
     var input by remember { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
+        shape = RoundedCornerShape(16.dp), // 规范：弹窗圆角 16dp
+        containerColor = Color.White,
+        title = {
+            Text(
+                title,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = WeChatColors.TextPrimary,
+            )
+        },
         text = {
             OutlinedTextField(
                 value = input,

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +44,8 @@ import com.linbuyu.app.ui.me.MeScreen
 import com.linbuyu.app.ui.me.SettingsScreen
 import com.linbuyu.app.ui.she.SheScreen
 import com.linbuyu.app.ui.theme.LinbuyuTheme
+import com.linbuyu.app.ui.theme.WeChatColors
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -59,6 +62,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 沉浸式：状态栏透明、内容延伸进状态栏，顶栏背景无缝衔接（修复顶部空白带）
+        androidx.activity.enableEdgeToEdge(
+            statusBarStyle = androidx.activity.SystemBarStyle.light(
+                android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT
+            ),
+            navigationBarStyle = androidx.activity.SystemBarStyle.light(
+                android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT
+            ),
+        )
         maybeRequestLocation()
         setContent {
             LinbuyuTheme {
@@ -161,24 +173,49 @@ private fun AppRoot() {
         containerColor = Color.White,
         bottomBar = {
             if (!inChat && settingsTab == -1) {
-                NavigationBar(containerColor = Color.White) {
+                NavigationBar(
+                    containerColor = Color.White,
+                    contentColor = WeChatColors.TextSecondary,
+                    tonalElevation = 0.dp,
+                ) {
                     NavigationBarItem(
                         selected = tab == 0,
                         onClick = { tab = 0 },
                         icon = { Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null) },
                         label = { Text("聊天") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = WeChatColors.Accent,
+                            selectedTextColor = WeChatColors.Accent,
+                            unselectedIconColor = WeChatColors.TextSecondary,
+                            unselectedTextColor = WeChatColors.TextSecondary,
+                            indicatorColor = Color.Transparent,
+                        ),
                     )
                     NavigationBarItem(
                         selected = tab == 1,
                         onClick = { tab = 1 },
                         icon = { Icon(Icons.Outlined.FavoriteBorder, contentDescription = null) },
                         label = { Text("她") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = WeChatColors.Accent,
+                            selectedTextColor = WeChatColors.Accent,
+                            unselectedIconColor = WeChatColors.TextSecondary,
+                            unselectedTextColor = WeChatColors.TextSecondary,
+                            indicatorColor = Color.Transparent,
+                        ),
                     )
                     NavigationBarItem(
                         selected = tab == 2,
                         onClick = { tab = 2 },
                         icon = { Icon(Icons.Outlined.PersonOutline, contentDescription = null) },
                         label = { Text("我") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = WeChatColors.Accent,
+                            selectedTextColor = WeChatColors.Accent,
+                            unselectedIconColor = WeChatColors.TextSecondary,
+                            unselectedTextColor = WeChatColors.TextSecondary,
+                            indicatorColor = Color.Transparent,
+                        ),
                     )
                 }
             }

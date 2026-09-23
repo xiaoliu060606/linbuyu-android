@@ -54,40 +54,45 @@ fun ChatListScreen(vm: ChatViewModel, onEnterChat: () -> Unit) {
                 .height(50.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text("林不语", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                "林不语",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = WeChatColors.TextPrimary,
+            )
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onEnterChat() }
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = 14.dp, vertical = 4.dp), // 48dp 头像 + 8dp 边距 = 行高 56dp
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
                 painter = painterResource(R.drawable.ai_avatar),
                 contentDescription = null,
-                modifier = Modifier.size(50.dp).clip(CircleShape),
+                modifier = Modifier.size(48.dp).clip(CircleShape),
                 contentScale = ContentScale.Crop,
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("林不语", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                    Text("林不语", fontSize = 16.sp)
                     Spacer(Modifier.width(6.dp))
-                    // 守护中徽标
+                    // 守护中徽标：浅绿底由 Accent 派生（规范无此色，不用裸值）
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color(0xFFD0F0D8))
+                            .background(WeChatColors.Accent.copy(alpha = 0.12f))
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
-                        Text("守护中", fontSize = 10.sp, color = Color(0xFF07A35C))
+                        Text("守护中", fontSize = 10.sp, color = WeChatColors.Accent)
                     }
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
                     preview,
-                    fontSize = 13.sp,
+                    fontSize = 12.sp, // 规范：辅助文字 11-12sp
                     color = WeChatColors.TextSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -100,7 +105,10 @@ fun ChatListScreen(vm: ChatViewModel, onEnterChat: () -> Unit) {
                 color = WeChatColors.TextSecondary,
             )
         }
-        HorizontalDivider(color = Color(0xFFE8E8E8))
+        HorizontalDivider(
+            color = Color(0xFFE5E5E5), // 规范：分隔线 #E5E5E5
+            thickness = 0.5.dp,
+        )
         Spacer(Modifier.weight(1f))
     }
 }

@@ -53,12 +53,17 @@ fun SheScreen() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
+                .background(WeChatColors.BarBackground)
                 .statusBarsPadding()
                 .height(50.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text("她", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                "她",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = WeChatColors.TextPrimary,
+            )
         }
 
         val s = status
@@ -83,13 +88,13 @@ fun SheScreen() {
                 Spacer(Modifier.height(16.dp))
                 Text(s.ai_name.ifBlank { "林不语" }, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(6.dp))
-                Text("在线", fontSize = 13.sp, color = WeChatColors.TextSecondary)
+                Text("在线", fontSize = 12.sp, color = WeChatColors.TextSecondary)
 
                 Spacer(Modifier.height(56.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(RoundedCornerShape(12.dp)) // 规范：卡片/列表圆角 12dp
                         .background(Color.White)
                         .padding(horizontal = 20.dp, vertical = 18.dp),
                 ) {

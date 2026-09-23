@@ -156,7 +156,7 @@ private fun ChatTitleBar(state: ChatUiState, onBack: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = WeChatColors.TextPrimary)
         }
         Image(
             painter = painterResource(R.drawable.ai_avatar),
