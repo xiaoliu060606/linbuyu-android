@@ -16,10 +16,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -176,14 +172,21 @@ private fun AppRoot() {
         bottomBar = {
             if (!inChat && settingsTab == -1) {
                 NavigationBar(
-                    containerColor = Color.White,
+                    containerColor = WeChatColors.TabBarBackground,
                     contentColor = WeChatColors.TextSecondary,
                     tonalElevation = 0.dp,
                 ) {
                     NavigationBarItem(
                         selected = tab == 0,
                         onClick = { tab = 0 },
-                        icon = { Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null) },
+                        icon = {
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(
+                                    if (tab == 0) R.drawable.ic_chats_fill else R.drawable.ic_chats_outline
+                                ),
+                                contentDescription = null,
+                            )
+                        },
                         label = { Text("聊天") },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = WeChatColors.Accent,
@@ -196,7 +199,14 @@ private fun AppRoot() {
                     NavigationBarItem(
                         selected = tab == 1,
                         onClick = { tab = 1 },
-                        icon = { Icon(Icons.Outlined.FavoriteBorder, contentDescription = null) },
+                        icon = {
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(
+                                    if (tab == 1) R.drawable.ic_contacts_fill else R.drawable.ic_contacts_outline
+                                ),
+                                contentDescription = null,
+                            )
+                        },
                         label = { Text("她") },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = WeChatColors.Accent,
@@ -209,7 +219,14 @@ private fun AppRoot() {
                     NavigationBarItem(
                         selected = tab == 2,
                         onClick = { tab = 2 },
-                        icon = { Icon(Icons.Outlined.PersonOutline, contentDescription = null) },
+                        icon = {
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(
+                                    if (tab == 2) R.drawable.ic_me_fill else R.drawable.ic_me_outline
+                                ),
+                                contentDescription = null,
+                            )
+                        },
                         label = { Text("我") },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = WeChatColors.Accent,

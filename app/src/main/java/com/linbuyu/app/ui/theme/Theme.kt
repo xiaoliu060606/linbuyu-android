@@ -19,9 +19,11 @@ object WeChatColors {
     val BubbleAi = Color.White
     val TextPrimary = Color(0xFF1F1F1F)
     val TextSecondary = Color(0xFF888888)
-    val BarBackground = Color(0xFFF7F7F7)
+    val BarBackground = Color(0xFFEDEDED)   // 微信顶栏灰（与聊天背景一致）
+    val TabBarBackground = Color(0xFFF7F7F7) // 微信 Tab 栏灰
     val ChatBackground = Color(0xFFEDEDED)
     val Accent = Color(0xFF07C160)
+    val Divider = Color(0xFFE5E5E5)
 }
 
 @Composable
