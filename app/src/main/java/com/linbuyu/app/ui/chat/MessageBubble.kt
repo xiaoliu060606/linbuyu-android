@@ -11,21 +11,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -35,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -148,54 +144,41 @@ private fun BubbleBox(
     val textColor = if (msg.isError) Color(0xFFD32F2F) else WeChatColors.TextPrimary
 
     val interactionSource = remember { MutableInteractionSource() }
-    Column {
+    Box {
+        // 微信式小尾巴：旋转 45° 的小方块与气泡同色，贴在气泡上缘
         Box(
             modifier = Modifier
-                .widthIn(max = 260.dp)
-                .clip(shape)
-                .background(bg)
-                .combinedClickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = { onTtsClick?.invoke() },
-                    onLongClick = { onLongPress?.invoke() },
-                )
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
+                .align(if (isUser) Alignment.TopEnd else Alignment.TopStart)
+                .offset(x = if (isUser) 5.dp else (-5).dp, y = 14.dp)
+                .size(12.dp)
+                .rotate(45f)
+                .background(bg, RoundedCornerShape(2.dp)),
+        )
+        Column {
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 260.dp)
+                    .clip(shape)
+                    .background(bg)
+                    .combinedClickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = { if (msg.isVoice && !isUser && !msg.special) onTtsClick?.invoke() },
+                        onLongClick = { onLongPress?.invoke() },
+                    )
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
             if (msg.isVoice && !isUser && !msg.special) {
                 // ── AI 语音条（微信风格：白气泡 + 喇叭朝左 + 时长，未播完有红点）──
                 VoiceRow(msg, playingId, onTtsClick)
             } else {
-                Column {
-                    Text(
-                        text = msg.content,
-                        color = textColor,
-                        fontSize = 15.sp,
-                        lineHeight = 21.sp,
-                        overflow = TextOverflow.Visible,
-                    )
-                    // 非语音形态的 AI 消息：右下角保留语音播放小按钮
-                    if (!isUser && !msg.special && onTtsClick != null) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End,
-                        ) {
-                            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-                                IconButton(
-                                    onClick = onTtsClick,
-                                    modifier = Modifier.size(24.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = if (playingId == msg.id) Icons.Filled.Stop else Icons.AutoMirrored.Filled.VolumeUp,
-                                        contentDescription = if (playingId == msg.id) "停止播放" else "播放语音",
-                                        tint = WeChatColors.TextSecondary,
-                                        modifier = Modifier.size(15.dp),
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                Text(
+                    text = msg.content,
+                    color = textColor,
+                    fontSize = 16.sp,
+                    lineHeight = 23.sp,
+                    overflow = TextOverflow.Visible,
+                )
             }
         }
         // 语音消息转文字结果（长按“转文字”后显示在气泡正下方，微信同款浅灰块）
@@ -224,6 +207,7 @@ private fun BubbleBox(
                 fontSize = 13.sp,
                 color = Color(0xFF999999),
             )
+        }
         }
     }
 }
@@ -273,7 +257,7 @@ private fun VoiceRow(msg: ChatMessage, playingId: Long?, onTtsClick: (() -> Unit
             )
         } else {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                painter = painterResource(R.drawable.ic_volume),
                 contentDescription = "播放语音",
                 tint = Color(0xFF333333),
                 modifier = Modifier.size(20.dp),
@@ -295,14 +279,14 @@ private fun estimateDuration(text: String): Long = (text.length * 280L).coerceIn
 private fun MessageAvatar(isAi: Boolean, name: String) {
     val drawable = if (isAi) R.drawable.ai_avatar else R.drawable.user_avatar
     Box(
-        modifier = Modifier.size(40.dp).clip(CircleShape),
+        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(6.dp)),
         contentAlignment = Alignment.Center,
     ) {
         androidx.compose.foundation.Image(
             painter = painterResource(drawable),
             contentDescription = name,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.size(40.dp).clip(CircleShape),
+            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(6.dp)),
         )
     }
 }

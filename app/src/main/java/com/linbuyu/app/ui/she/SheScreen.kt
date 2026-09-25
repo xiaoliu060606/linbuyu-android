@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -78,17 +80,27 @@ fun SheScreen() {
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Spacer(Modifier.height(72.dp))
+                Spacer(Modifier.height(56.dp))
                 Image(
                     painter = painterResource(R.drawable.ai_avatar),
                     contentDescription = null,
-                    modifier = Modifier.size(110.dp).clip(CircleShape),
+                    modifier = Modifier.size(120.dp).clip(RoundedCornerShape(6.dp)),
                     contentScale = ContentScale.Crop,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(s.ai_name.ifBlank { "林不语" }, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(6.dp))
-                Text("在线", fontSize = 12.sp, color = WeChatColors.TextSecondary)
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // 在线状态绿点（微信在线标识样式）
+                    Box(
+                        Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(WeChatColors.Accent)
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text("在线", fontSize = 13.sp, color = WeChatColors.TextSecondary)
+                }
 
                 Spacer(Modifier.height(56.dp))
                 Box(

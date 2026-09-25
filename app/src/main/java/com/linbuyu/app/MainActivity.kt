@@ -15,6 +15,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
@@ -172,6 +173,8 @@ private fun AppRoot() {
 
     Scaffold(
         containerColor = Color.White,
+        // 沉浸式：内容区不再自动避让状态栏，由各页顶栏背景直接延伸到状态栏（微信做法）
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (!inChat && settingsTab == -1) {
                 Column {
@@ -188,7 +191,7 @@ private fun AppRoot() {
                             icon = {
                                 Icon(
                                     painter = androidx.compose.ui.res.painterResource(
-                                        if (tab == 0) R.drawable.ic_chats_fill else R.drawable.ic_chats_outline
+                                        if (tab == 0) R.drawable.ic_tab_chats_fill else R.drawable.ic_tab_chats_line
                                     ),
                                     contentDescription = null,
                                 )
@@ -208,7 +211,7 @@ private fun AppRoot() {
                             icon = {
                                 Icon(
                                     painter = androidx.compose.ui.res.painterResource(
-                                        if (tab == 1) R.drawable.ic_contacts_fill else R.drawable.ic_contacts_outline
+                                        if (tab == 1) R.drawable.ic_tab_she_fill else R.drawable.ic_tab_she_line
                                     ),
                                     contentDescription = null,
                                 )
@@ -228,7 +231,7 @@ private fun AppRoot() {
                             icon = {
                                 Icon(
                                     painter = androidx.compose.ui.res.painterResource(
-                                        if (tab == 2) R.drawable.ic_me_fill else R.drawable.ic_me_outline
+                                        if (tab == 2) R.drawable.ic_tab_me_fill else R.drawable.ic_tab_me_line
                                     ),
                                     contentDescription = null,
                                 )

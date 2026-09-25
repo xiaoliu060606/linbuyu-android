@@ -14,8 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -38,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.linbuyu.app.R
 import com.linbuyu.app.audio.TtsPlayer
 import com.linbuyu.app.ui.theme.WeChatColors
 
@@ -73,10 +72,13 @@ fun ChatScreen(vm: ChatViewModel, onBack: () -> Unit) {
                 onDismiss = { longPressed = null },
             )
         } else {
+            // 微信式长按菜单：播放/删除
+            val items = buildList {
+                if (!msg.special) add("播放语音" to { vm.toggleTts(msg) })
+                add("删除" to { vm.deleteMessage(msg) })
+            }
             VoiceActionSheet(
-                items = listOf(
-                    "删除" to { vm.deleteMessage(msg) },
-                ),
+                items = items,
                 onDismiss = { longPressed = null },
             )
         }
@@ -151,7 +153,12 @@ private fun ChatTitleBar(state: ChatUiState, onBack: () -> Unit, onCallClick: ()
             onClick = onBack,
             modifier = Modifier.align(Alignment.CenterStart).padding(start = 2.dp),
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = WeChatColors.TextPrimary)
+            Icon(
+                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_back),
+                contentDescription = "返回",
+                tint = WeChatColors.TextPrimary,
+                modifier = Modifier.size(26.dp),
+            )
         }
         Text(
             state.aiName,
@@ -167,10 +174,10 @@ private fun ChatTitleBar(state: ChatUiState, onBack: () -> Unit, onCallClick: ()
             modifier = Modifier.align(Alignment.CenterEnd).padding(end = 2.dp),
         ) {
             Icon(
-                Icons.Filled.Phone,
+                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_phone),
                 contentDescription = "语音通话",
                 tint = WeChatColors.TextPrimary,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(23.dp),
             )
         }
     }

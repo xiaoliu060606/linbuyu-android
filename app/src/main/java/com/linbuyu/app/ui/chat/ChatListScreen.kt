@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -77,7 +75,7 @@ fun ChatListScreen(vm: ChatViewModel, onEnterChat: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                Icons.Filled.Search,
+                painter = painterResource(R.drawable.ic_search),
                 contentDescription = null,
                 tint = Color(0xFF999999),
                 modifier = Modifier.size(16.dp),
@@ -95,7 +93,7 @@ fun ChatListScreen(vm: ChatViewModel, onEnterChat: () -> Unit) {
             Image(
                 painter = painterResource(R.drawable.ai_avatar),
                 contentDescription = null,
-                modifier = Modifier.size(48.dp).clip(CircleShape),
+                modifier = Modifier.size(52.dp).clip(RoundedCornerShape(6.dp)),
                 contentScale = ContentScale.Crop,
             )
             Spacer(Modifier.width(12.dp))

@@ -44,6 +44,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.linbuyu.app.LinbuyuApp
@@ -101,7 +103,7 @@ fun MeScreen(onOpenSettings: (Int) -> Unit) {
                 Image(
                     painter = painterResource(R.drawable.user_avatar),
                     contentDescription = null,
-                    modifier = Modifier.size(64.dp).clip(CircleShape),
+                    modifier = Modifier.size(64.dp).clip(RoundedCornerShape(6.dp)),
                     contentScale = ContentScale.Crop,
                 )
                 Spacer(Modifier.width(16.dp))
@@ -241,12 +243,15 @@ fun SettingCell(title: String, value: String, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(title, fontSize = 16.sp, color = WeChatColors.TextPrimary)
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.width(12.dp))
         Text(
             value,
-            fontSize = 14.sp, // 规范：右侧值 14sp #888
+            fontSize = 13.sp,
             color = WeChatColors.TextSecondary,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1f),
         )
         Spacer(Modifier.width(4.dp))
         Icon(
