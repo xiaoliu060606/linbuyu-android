@@ -15,7 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,6 +64,26 @@ fun ChatListScreen(vm: ChatViewModel, onEnterChat: () -> Unit) {
                 fontWeight = FontWeight.SemiBold,
                 color = WeChatColors.TextPrimary,
             )
+        }
+        // 微信首页搜索框：灰圆角 + 放大镜 + 占位文案
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 6.dp)
+                .height(34.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(WeChatColors.SearchBackground)
+                .padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Filled.Search,
+                contentDescription = null,
+                tint = Color(0xFF999999),
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(4.dp))
+            Text("搜索", fontSize = 14.sp, color = Color(0xFF999999))
         }
         Row(
             modifier = Modifier

@@ -24,6 +24,11 @@ object WeChatColors {
     val ChatBackground = Color(0xFFEDEDED)
     val Accent = Color(0xFF07C160)
     val Divider = Color(0xFFE5E5E5)
+    val TabUnselected = Color(0xFFB2B2B2)   // 微信 Tab 未选中灰
+    val PageBackground = Color(0xFFF7F7F7) // 微信"我"等二级页灰底
+    val SearchBackground = Color(0xFFF2F2F2) // 微信搜索框灰
+    val UnreadRed = Color(0xFFFA5151)      // 微信未读红点
+    val TabHairline = Color(0xFFD5D5D5)    // 微信 Tab 栏顶部发丝线
 }
 
 @Composable

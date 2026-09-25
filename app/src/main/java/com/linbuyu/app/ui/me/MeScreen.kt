@@ -51,7 +51,7 @@ import com.linbuyu.app.R
 import com.linbuyu.app.ui.theme.WeChatColors
 import kotlinx.coroutines.launch
 
-/** 我 Tab：服务器地址 / 访问令牌 / 设置入口 / 连接测试 */
+/** 我 Tab：微信"我"页风格——灰底 + 白色圆角分组卡片，各项：服务器地址 / 访问令牌 / 设置入口 / 连接测试 */
 @Composable
 fun MeScreen(onOpenSettings: (Int) -> Unit) {
     val app = LocalContext.current.applicationContext as LinbuyuApp
@@ -71,7 +71,7 @@ fun MeScreen(onOpenSettings: (Int) -> Unit) {
         token = settings.getToken()
     }
 
-    Column(Modifier.fillMaxSize().background(Color.White)) {
+    Column(Modifier.fillMaxSize().background(WeChatColors.PageBackground)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,75 +88,77 @@ fun MeScreen(onOpenSettings: (Int) -> Unit) {
             )
         }
 
-        Column(Modifier.verticalScroll(rememberScrollState())) {
-            // 用户信息头
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 16.dp)
+        ) {
+            // 用户信息头（灰底，微信"我"页顶部）
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Image(
                     painter = painterResource(R.drawable.user_avatar),
                     contentDescription = null,
-                    modifier = Modifier.size(56.dp).clip(CircleShape),
+                    modifier = Modifier.size(64.dp).clip(CircleShape),
                     contentScale = ContentScale.Crop,
                 )
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(16.dp))
                 Column {
-                    Text("我的伴侣", fontSize = 16.sp)
+                    Text("我的伴侣", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(4.dp))
                     Text("连接你的林不语", fontSize = 12.sp, color = WeChatColors.TextSecondary)
                 }
             }
-            HorizontalDivider(
-                color = Color(0xFFE5E5E5), // 规范：分隔线 #E5E5E5
-                thickness = 0.5.dp,
-            )
 
             SectionTitle("连接")
-            SettingCell("服务器地址", baseUrl) { showUrlDialog = true }
-            SettingCell("访问令牌", if (token.isBlank()) "未设置" else "••••••${token.takeLast(4)}") { showTokenDialog = true }
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Button(
-                    onClick = {
-                        scope.launch {
-                            testing = true
-                            testResult = ""
-                            val status = app.repository.fetchStatus()
-                            testing = false
-                            testResult = if (status.ai_name.isNotEmpty()) {
-                                "✓ 连接成功：${status.ai_name}（${status.mood_emoji}）"
-                            } else "✗ 连接失败：检查地址与令牌"
-                        }
-                    },
-                    enabled = !testing,
-                    shape = RoundedCornerShape(6.dp), // 规范：按钮圆角 6-8dp
-                    colors = ButtonDefaults.buttonColors(containerColor = WeChatColors.Accent),
+            WeChatCard {
+                SettingCell("服务器地址", baseUrl) { showUrlDialog = true }
+                InsetDivider()
+                SettingCell("访问令牌", if (token.isBlank()) "未设置" else "••••••${token.takeLast(4)}") { showTokenDialog = true }
+                InsetDivider()
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(if (testing) "测试中…" else "测试连接")
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                testing = true
+                                testResult = ""
+                                val status = app.repository.fetchStatus()
+                                testing = false
+                                testResult = if (status.ai_name.isNotEmpty()) {
+                                    "✓ 连接成功：${status.ai_name}（${status.mood_emoji}）"
+                                } else "✗ 连接失败：检查地址与令牌"
+                            }
+                        },
+                        enabled = !testing,
+                        shape = RoundedCornerShape(6.dp), // 规范：按钮圆角 6-8dp
+                        colors = ButtonDefaults.buttonColors(containerColor = WeChatColors.Accent),
+                    ) {
+                        Text(if (testing) "测试中…" else "测试连接")
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Text(testResult, fontSize = 12.sp, color = WeChatColors.TextSecondary)
                 }
-                Spacer(Modifier.width(12.dp))
-                Text(testResult, fontSize = 12.sp, color = WeChatColors.TextSecondary)
             }
-            HorizontalDivider(
-                color = Color(0xFFE5E5E5), // 规范：分隔线 #E5E5E5
-                thickness = 0.5.dp,
-            )
 
             SectionTitle("设置")
-            SettingCell("人物设定", "名字 · 性格 · 参数") { onOpenSettings(0) }
-            SettingCell("API 配置", "对话 · 生图 · 语音") { onOpenSettings(1) }
-            HorizontalDivider(
-                color = Color(0xFFE5E5E5), // 规范：分隔线 #E5E5E5
-                thickness = 0.5.dp,
-            )
+            WeChatCard {
+                SettingCell("人物设定", "名字 · 性格 · 参数") { onOpenSettings(0) }
+                InsetDivider()
+                SettingCell("API 配置", "对话 · 生图 · 语音") { onOpenSettings(1) }
+            }
 
             SectionTitle("关于")
-            SettingCell("版本", "1.0.0（安卓原生版）") {}
-            Spacer(Modifier.height(24.dp))
+            WeChatCard {
+                SettingCell("版本", "1.0.0（安卓原生版）") {}
+            }
+            Spacer(Modifier.height(8.dp))
             Text(
                 "林不语 · 你的 AI 伴侣\n聊天记录与记忆存储在你的服务器上",
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -193,6 +195,29 @@ fun MeScreen(onOpenSettings: (Int) -> Unit) {
             },
         )
     }
+}
+
+/** 微信"我"页分组卡片：白底圆角，外侧灰底留白 */
+@Composable
+private fun WeChatCard(content: @Composable () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+            .clip(RoundedCornerShape(12.dp)) // 规范：卡片/列表圆角 12dp
+            .background(Color.White)
+            .padding(vertical = 4.dp),
+    ) { content() }
+}
+
+/** 卡片内部分隔线：左侧缩进 16dp（微信 cell 分隔线样式） */
+@Composable
+private fun InsetDivider() {
+    HorizontalDivider(
+        color = WeChatColors.Divider,
+        thickness = 0.5.dp,
+        modifier = Modifier.padding(start = 16.dp),
+    )
 }
 
 @Composable

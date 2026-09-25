@@ -1,24 +1,21 @@
 package com.linbuyu.app.ui.chat
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -35,16 +32,12 @@ import com.linbuyu.app.ui.call.CallScreen
 import com.linbuyu.app.ui.call.CallViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.linbuyu.app.R
 import com.linbuyu.app.audio.TtsPlayer
 import com.linbuyu.app.ui.theme.WeChatColors
 
@@ -90,7 +83,7 @@ fun ChatScreen(vm: ChatViewModel, onBack: () -> Unit) {
     }
 
     Column(Modifier.fillMaxSize().background(WeChatColors.ChatBackground)) {
-        ChatTitleBar(state, onBack)
+        ChatTitleBar(state, onBack, onCallClick = { showCall = true })
 
         LazyColumn(
             state = listState,
@@ -145,30 +138,40 @@ fun ChatScreen(vm: ChatViewModel, onBack: () -> Unit) {
 }
 
 @Composable
-private fun ChatTitleBar(state: ChatUiState, onBack: () -> Unit) {
-    Row(
+private fun ChatTitleBar(state: ChatUiState, onBack: () -> Unit, onCallClick: () -> Unit) {
+    // 微信聊天页标题栏：返回箭头在左、名字居中、通话入口在右；无头像、无状态副标题
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(WeChatColors.BarBackground)
             .statusBarsPadding()
-            .height(54.dp)
-            .padding(horizontal = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .height(54.dp),
     ) {
-        IconButton(onClick = onBack) {
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.align(Alignment.CenterStart).padding(start = 2.dp),
+        ) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = WeChatColors.TextPrimary)
         }
-        Image(
-            painter = painterResource(R.drawable.ai_avatar),
-            contentDescription = null,
-            modifier = Modifier.size(38.dp).clip(CircleShape),
-            contentScale = ContentScale.Crop,
+        Text(
+            state.aiName,
+            modifier = Modifier.align(Alignment.Center).padding(horizontal = 76.dp),
+            fontSize = 17.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = WeChatColors.TextPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        Spacer(Modifier.width(8.dp))
-        Column(Modifier.weight(1f)) {
-            Text(state.aiName, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-            Text("在线", fontSize = 11.sp, color = WeChatColors.TextSecondary)
+        IconButton(
+            onClick = onCallClick,
+            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 2.dp),
+        ) {
+            Icon(
+                Icons.Filled.Phone,
+                contentDescription = "语音通话",
+                tint = WeChatColors.TextPrimary,
+                modifier = Modifier.size(22.dp),
+            )
         }
-        Spacer(Modifier.width(8.dp))
     }
 }

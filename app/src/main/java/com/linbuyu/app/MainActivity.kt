@@ -15,7 +15,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -44,6 +46,7 @@ import com.linbuyu.app.ui.she.SheScreen
 import com.linbuyu.app.ui.theme.LinbuyuTheme
 import com.linbuyu.app.ui.theme.WeChatColors
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -171,71 +174,75 @@ private fun AppRoot() {
         containerColor = Color.White,
         bottomBar = {
             if (!inChat && settingsTab == -1) {
-                NavigationBar(
-                    containerColor = WeChatColors.TabBarBackground,
-                    contentColor = WeChatColors.TextSecondary,
-                    tonalElevation = 0.dp,
-                ) {
-                    NavigationBarItem(
-                        selected = tab == 0,
-                        onClick = { tab = 0 },
-                        icon = {
-                            Icon(
-                                painter = androidx.compose.ui.res.painterResource(
-                                    if (tab == 0) R.drawable.ic_chats_fill else R.drawable.ic_chats_outline
-                                ),
-                                contentDescription = null,
-                            )
-                        },
-                        label = { Text("聊天") },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = WeChatColors.Accent,
-                            selectedTextColor = WeChatColors.Accent,
-                            unselectedIconColor = WeChatColors.TextSecondary,
-                            unselectedTextColor = WeChatColors.TextSecondary,
-                            indicatorColor = Color.Transparent,
-                        ),
-                    )
-                    NavigationBarItem(
-                        selected = tab == 1,
-                        onClick = { tab = 1 },
-                        icon = {
-                            Icon(
-                                painter = androidx.compose.ui.res.painterResource(
-                                    if (tab == 1) R.drawable.ic_contacts_fill else R.drawable.ic_contacts_outline
-                                ),
-                                contentDescription = null,
-                            )
-                        },
-                        label = { Text("她") },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = WeChatColors.Accent,
-                            selectedTextColor = WeChatColors.Accent,
-                            unselectedIconColor = WeChatColors.TextSecondary,
-                            unselectedTextColor = WeChatColors.TextSecondary,
-                            indicatorColor = Color.Transparent,
-                        ),
-                    )
-                    NavigationBarItem(
-                        selected = tab == 2,
-                        onClick = { tab = 2 },
-                        icon = {
-                            Icon(
-                                painter = androidx.compose.ui.res.painterResource(
-                                    if (tab == 2) R.drawable.ic_me_fill else R.drawable.ic_me_outline
-                                ),
-                                contentDescription = null,
-                            )
-                        },
-                        label = { Text("我") },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = WeChatColors.Accent,
-                            selectedTextColor = WeChatColors.Accent,
-                            unselectedIconColor = WeChatColors.TextSecondary,
-                            unselectedTextColor = WeChatColors.TextSecondary,
-                            indicatorColor = Color.Transparent,
-                        ),
-                    )
+                Column {
+                    // 微信 Tab 栏顶部发丝线分隔
+                    HorizontalDivider(color = WeChatColors.TabHairline, thickness = 0.5.dp)
+                    NavigationBar(
+                        containerColor = WeChatColors.TabBarBackground,
+                        contentColor = WeChatColors.TabUnselected,
+                        tonalElevation = 0.dp,
+                    ) {
+                        NavigationBarItem(
+                            selected = tab == 0,
+                            onClick = { tab = 0 },
+                            icon = {
+                                Icon(
+                                    painter = androidx.compose.ui.res.painterResource(
+                                        if (tab == 0) R.drawable.ic_chats_fill else R.drawable.ic_chats_outline
+                                    ),
+                                    contentDescription = null,
+                                )
+                            },
+                            label = { Text("聊天", fontSize = 11.sp) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = WeChatColors.Accent,
+                                selectedTextColor = WeChatColors.Accent,
+                                unselectedIconColor = WeChatColors.TabUnselected,
+                                unselectedTextColor = WeChatColors.TabUnselected,
+                                indicatorColor = Color.Transparent,
+                            ),
+                        )
+                        NavigationBarItem(
+                            selected = tab == 1,
+                            onClick = { tab = 1 },
+                            icon = {
+                                Icon(
+                                    painter = androidx.compose.ui.res.painterResource(
+                                        if (tab == 1) R.drawable.ic_contacts_fill else R.drawable.ic_contacts_outline
+                                    ),
+                                    contentDescription = null,
+                                )
+                            },
+                            label = { Text("她", fontSize = 11.sp) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = WeChatColors.Accent,
+                                selectedTextColor = WeChatColors.Accent,
+                                unselectedIconColor = WeChatColors.TabUnselected,
+                                unselectedTextColor = WeChatColors.TabUnselected,
+                                indicatorColor = Color.Transparent,
+                            ),
+                        )
+                        NavigationBarItem(
+                            selected = tab == 2,
+                            onClick = { tab = 2 },
+                            icon = {
+                                Icon(
+                                    painter = androidx.compose.ui.res.painterResource(
+                                        if (tab == 2) R.drawable.ic_me_fill else R.drawable.ic_me_outline
+                                    ),
+                                    contentDescription = null,
+                                )
+                            },
+                            label = { Text("我", fontSize = 11.sp) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = WeChatColors.Accent,
+                                selectedTextColor = WeChatColors.Accent,
+                                unselectedIconColor = WeChatColors.TabUnselected,
+                                unselectedTextColor = WeChatColors.TabUnselected,
+                                indicatorColor = Color.Transparent,
+                            ),
+                        )
+                    }
                 }
             }
         },
