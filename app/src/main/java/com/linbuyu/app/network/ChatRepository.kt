@@ -31,31 +31,34 @@ class ChatRepository(private val api: ApiClient, private val sse: SseClient) {
     }
 
     suspend fun fetchStatus(): StatusResponse = withContext(Dispatchers.IO) {
-        api.client.newCall(api.buildRequest("/api/status")).execute().use { resp ->
-            if (resp.isSuccessful) {
-                runCatching { gson.fromJson(resp.body?.string(), StatusResponse::class.java) }
-                    .getOrDefault(StatusResponse())
-            } else StatusResponse()
-        }
+        runCatching {
+            api.client.newCall(api.buildRequest("/api/status")).execute().use { resp ->
+                if (resp.isSuccessful) {
+                    gson.fromJson(resp.body?.string(), StatusResponse::class.java)
+                } else StatusResponse()
+            }
+        }.getOrDefault(StatusResponse())
     }
 
     suspend fun fetchHistory(limit: Int = 200): List<HistoryItem> = withContext(Dispatchers.IO) {
-        api.client.newCall(api.buildRequest("/api/history?limit=$limit")).execute().use { resp ->
-            if (resp.isSuccessful) {
-                runCatching { gson.fromJson(resp.body?.string(), HistoryResponse::class.java).history }
-                    .getOrDefault(emptyList())
-            } else emptyList()
-        }
+        runCatching {
+            api.client.newCall(api.buildRequest("/api/history?limit=$limit")).execute().use { resp ->
+                if (resp.isSuccessful) {
+                    gson.fromJson(resp.body?.string(), HistoryResponse::class.java).history
+                } else emptyList()
+            }
+        }.getOrDefault(emptyList())
     }
 
     /** /api/proactive 是"读取即清空"的单客户端队列，必须只由前台服务轮询 */
     suspend fun fetchProactive(): List<ProactiveMessage> = withContext(Dispatchers.IO) {
-        api.client.newCall(api.buildRequest("/api/proactive")).execute().use { resp ->
-            if (resp.isSuccessful) {
-                runCatching { gson.fromJson(resp.body?.string(), ProactiveResponse::class.java).messages }
-                    .getOrDefault(emptyList())
-            } else emptyList()
-        }
+        runCatching {
+            api.client.newCall(api.buildRequest("/api/proactive")).execute().use { resp ->
+                if (resp.isSuccessful) {
+                    gson.fromJson(resp.body?.string(), ProactiveResponse::class.java).messages
+                } else emptyList()
+            }
+        }.getOrDefault(emptyList())
     }
 
     /** /api/tts 语音合成：返回 ogg/opus 音频字节流，失败返回 null */
@@ -101,22 +104,24 @@ class ChatRepository(private val api: ApiClient, private val sse: SseClient) {
 
     /** GET /api/weather */
     suspend fun fetchWeather(): WeatherData = withContext(Dispatchers.IO) {
-        api.client.newCall(api.buildRequest("/api/weather")).execute().use { resp ->
-            if (resp.isSuccessful) {
-                runCatching { gson.fromJson(resp.body?.string(), WeatherData::class.java) }
-                    .getOrDefault(WeatherData())
-            } else WeatherData()
-        }
+        runCatching {
+            api.client.newCall(api.buildRequest("/api/weather")).execute().use { resp ->
+                if (resp.isSuccessful) {
+                    gson.fromJson(resp.body?.string(), WeatherData::class.java)
+                } else WeatherData()
+            }
+        }.getOrDefault(WeatherData())
     }
 
     /** GET /api/reminders 到期提醒 */
     suspend fun fetchReminders(): List<ReminderItem> = withContext(Dispatchers.IO) {
-        api.client.newCall(api.buildRequest("/api/reminders")).execute().use { resp ->
-            if (resp.isSuccessful) {
-                runCatching { gson.fromJson(resp.body?.string(), RemindersResponse::class.java).due }
-                    .getOrDefault(emptyList())
-            } else emptyList()
-        }
+        runCatching {
+            api.client.newCall(api.buildRequest("/api/reminders")).execute().use { resp ->
+                if (resp.isSuccessful) {
+                    gson.fromJson(resp.body?.string(), RemindersResponse::class.java).due
+                } else emptyList()
+            }
+        }.getOrDefault(emptyList())
     }
 
     /** POST /api/reminders/ack 标记提醒已处理 */
@@ -134,12 +139,13 @@ class ChatRepository(private val api: ApiClient, private val sse: SseClient) {
     }
 
     suspend fun fetchSettings(): SettingsData = withContext(Dispatchers.IO) {
-        api.client.newCall(api.buildRequest("/api/settings")).execute().use { resp ->
-            if (resp.isSuccessful) {
-                runCatching { gson.fromJson(resp.body?.string(), SettingsData::class.java) }
-                    .getOrDefault(SettingsData())
-            } else SettingsData()
-        }
+        runCatching {
+            api.client.newCall(api.buildRequest("/api/settings")).execute().use { resp ->
+                if (resp.isSuccessful) {
+                    gson.fromJson(resp.body?.string(), SettingsData::class.java)
+                } else SettingsData()
+            }
+        }.getOrDefault(SettingsData())
     }
 
     suspend fun saveSettings(data: SettingsData): Boolean = withContext(Dispatchers.IO) {
