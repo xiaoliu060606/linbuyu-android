@@ -47,15 +47,16 @@ jobs:
       - name: Push APK to server (bypass slow GitHub download, retry)
         run: |
           OK=0
-          for i in 1 2 3; do
+          for i in 1 2 3 4 5; do
             echo "APK 推送尝试 $i"
-            CODE=$(curl -s -m 240 -X POST "https://xuenai.cc.cd/api/apk?name=linbuyu-v1."${{ github.run_number }}.apk \
+            CODE=$(curl -s --http1.1 -m 300 --retry 2 --retry-delay 5 --retry-all-errors \
+              -X POST "https://xuenai.cc.cd/api/apk?name=linbuyu-v1."${{ github.run_number }}.apk \
               -H "X-Apk-Token: linbuyu-build-2026" \
               --data-binary "@app/build/outputs/apk/debug/app-debug.apk" \
               -w "%{http_code}" -o /tmp/apkpush_resp.txt)
             echo "HTTP $CODE"
             if [ "$CODE" == "200" ]; then OK=1; break; fi
-            sleep 20
+            sleep 30
           done
           if [ "$OK" != "1" ]; then echo "APK 推送最终失败"; cat /tmp/apkpush_resp.txt; exit 1; fi
 
